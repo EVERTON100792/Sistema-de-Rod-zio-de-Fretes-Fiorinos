@@ -443,6 +443,9 @@ Quando há um empate no valor faturado (por exemplo, R$ 0,00 no início da quinz
 
 *RESUMINDO:*
 A prioridade é sempre de quem faturou menos. Em caso de empate, a prioridade é de quem está há mais tempo sem trabalhar.
+
+*ATENÇÃO:*
+Isso significa que quem tiver o *maior valor faturado* na quinzena corre o risco de não receber cargas, pois o sistema sempre passará os fretes para quem tem o menor valor acumulado, buscando equilibrar o faturamento de todos.
         `.trim();
 
         rulesTextarea.value = rulesText;
