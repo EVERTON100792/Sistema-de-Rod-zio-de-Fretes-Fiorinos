@@ -1,0 +1,483 @@
+/* Importação da Fonte e Reset Básico */
+@import url('https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&display=swap');
+
+/* Paleta de Cores - TEMA ESCURO */
+:root {
+    --color-primary: #4a90e2;
+    --color-primary-dark: #357abd;
+    --color-success: #28a745;
+    --color-success-dark: #1e7e34;
+    --color-danger: #dc3545;
+    --color-danger-dark: #b02a37;
+    --color-warning: #ffc107;
+    --color-warning-dark: #d39e00;
+    --color-bg-light: #121212;      /* Fundo principal */
+    --color-bg-panel: #1e1e1e;      /* Fundo dos painéis */
+    --color-text: #e0e0e0;          /* Texto principal */
+    --color-text-light: #888;       /* Texto secundário */
+    --color-border: #333;           /* Bordas */
+    --shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+    --border-radius: 8px;
+}
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: 'Roboto', sans-serif;
+    background-color: var(--color-bg-light);
+    color: var(--color-text);
+    line-height: 1.6;
+}
+
+/* Header */
+header {
+    background-color: var(--color-bg-panel);
+    color: white;
+    padding: 1.5rem 2rem;
+    text-align: center;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+    position: relative; /* Necessário para posicionar a animação */
+    overflow: hidden;   /* Esconde o caminhão quando está fora da tela */
+}
+
+header h1 {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 15px;
+    font-weight: 500;
+}
+
+/* --- Animação do Caminhão --- */
+.truck-animation {
+    position: absolute;
+    bottom: 5px;
+    left: -60px; /* Começa fora da tela */
+    font-size: 2rem;
+    color: var(--color-primary);
+    animation: drive 15s linear infinite;
+}
+
+@keyframes drive {
+    0% {
+        transform: translateX(0);
+    }
+    100% {
+        /* Move o caminhão por toda a largura da tela + 120px para garantir que saia completamente */
+        transform: translateX(calc(100vw + 120px));
+    }
+}
+
+
+
+/* Layout Principal */
+main {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 1.5rem;
+    padding: 1.5rem;
+    max-width: 1600px;
+    margin: 0 auto;
+}
+
+.panel {
+    background-color: var(--color-bg-panel);
+    border-radius: var(--border-radius);
+    box-shadow: var(--shadow);
+    padding: 1.5rem;
+}
+
+.management-panel {
+    flex: 1;
+    min-width: 320px;
+    align-self: flex-start; /* Mantém o painel alinhado ao topo */
+}
+
+.driver-board {
+    flex: 3;
+    min-width: 600px;
+}
+
+/* Formulários e Botões */
+h2 {
+    font-weight: 500;
+    color: var(--color-primary);
+    margin-bottom: 1.5rem;
+    border-bottom: 2px solid var(--color-bg-light);
+    padding-bottom: 0.5rem;
+}
+
+.management-panel p {
+    font-size: 0.9rem;
+    color: var(--color-text-light);
+    margin-bottom: 1rem;
+}
+
+hr {
+    border: 0;
+    height: 1px;
+    background-color: var(--color-border);
+    margin: 1.5rem 0;
+}
+
+.form-group {
+    display: flex;
+    gap: 10px;
+    margin-bottom: 1rem;
+}
+
+input[type="text"],
+input[type="number"] {
+    flex: 1;
+    padding: 0.75rem;
+    border: 1px solid var(--color-border);
+    background-color: #2c2c2c;
+    color: var(--color-text);
+    border-radius: var(--border-radius);
+    font-size: 1rem;
+}
+
+/* Estilo do campo de busca */
+.search-container {
+    margin-bottom: 1.5rem;
+    align-items: center;
+    border: 1px solid var(--color-border);
+    border-radius: var(--border-radius);
+    padding: 0 0.75rem;
+}
+.search-container .material-symbols-outlined {
+    color: var(--color-text-light);
+}
+.search-container input {
+    border: none;
+    background: transparent;
+}
+.search-container input:focus { box-shadow: none; }
+
+input:focus {
+    outline: none;
+    border-color: var(--color-primary);
+    box-shadow: 0 0 0 2px rgba(0,123,255,0.25);
+}
+
+.btn {
+    padding: 0.75rem 1rem;
+    border: none;
+    border-radius: var(--border-radius);
+    cursor: pointer;
+    font-size: 1rem;
+    font-weight: 500;
+    transition: all 0.2s ease;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+}
+
+.btn:hover {
+    opacity: 0.9;
+    transform: translateY(-2px);
+}
+
+.btn-primary {
+    background-color: var(--color-primary);
+    color: white;
+}
+.btn-primary:hover { background-color: var(--color-primary-dark); }
+
+.btn-success {
+    background-color: var(--color-success);
+    color: white;
+}
+.btn-success:hover { background-color: var(--color-success-dark); }
+
+.btn-danger {
+    background-color: var(--color-danger);
+    color: white;
+    width: 100%;
+}
+.btn-danger:hover { background-color: var(--color-danger-dark); }
+
+/* Botões pequenos da tabela */
+.btn-small-danger, .btn-small-success {
+    padding: 0.35rem 0.6rem;
+    font-size: 0.85rem;
+    border-radius: 4px;
+    width: 100%;
+}
+
+.btn-small-danger {
+    background-color: var(--color-danger);
+    color: white;
+}
+.btn-small-danger:hover { background-color: var(--color-danger-dark); }
+
+.btn-small-success {
+    background-color: var(--color-success);
+    color: white;
+}
+.btn-small-success:hover { background-color: var(--color-success-dark); }
+
+/* Tabela do Quadro */
+.table-container {
+    width: 100%;
+    overflow-x: auto; /* Garante responsividade em telas menores */
+}
+
+table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 1rem;
+}
+
+th, td {
+    padding: 0.75rem 1rem;
+    text-align: left;
+    border-bottom: 1px solid var(--color-border);
+    vertical-align: middle;
+}
+
+th {
+    background-color: #252525;
+    font-weight: 500;
+    color: var(--color-text-light);
+    white-space: nowrap;
+}
+
+tbody tr:hover {
+    background-color: #2a2a2a;
+}
+
+/* Destaque para o primeiro da lista (PRÓXIMO DA VEZ) */
+tbody tr:first-child {
+    background-color: rgba(74, 144, 226, 0.15); /* Fundo azul translúcido */
+    border-left: 4px solid var(--color-primary);
+}
+
+tbody tr:first-child td:first-child {
+    font-weight: 700;
+    color: var(--color-primary);
+    position: relative;
+}
+
+/* Selo "PRÓXIMO" */
+tbody tr:first-child td:first-child::after {
+    content: 'PRÓXIMO';
+    position: absolute;
+    top: -10px;
+    left: 50%;
+    transform: translateX(-50%);
+    background-color: var(--color-primary);
+    color: white;
+    padding: 2px 6px;
+    border-radius: 10px;
+    font-size: 0.65rem;
+    font-weight: 700;
+    letter-spacing: 0.5px;
+}
+
+tbody tr:first-child td:nth-child(2) { /* Nome do próximo */
+    font-weight: 700;
+    color: var(--color-primary);
+}
+
+/* Destaque para a linha pesquisada */
+tr.highlighted {
+    background-color: #357abd20; /* Azul primário com transparência */
+    border-left: 4px solid var(--color-warning);
+    border-right: 4px solid var(--color-warning);
+}
+
+td:nth-child(1) { /* Posição */
+    font-weight: 700;
+    font-size: 1.1rem;
+    color: var(--color-primary);
+    width: 50px;
+    text-align: center;
+}
+
+td:nth-child(3) { /* Faturamento */
+    font-weight: 500;
+    white-space: nowrap;
+}
+
+td:nth-child(4) { /* Data */
+    font-size: 0.9rem;
+    color: var(--color-text-light);
+    white-space: nowrap;
+}
+
+/* Coluna de Registro de Frete */
+td:nth-child(5) {
+    min-width: 250px;
+}
+.freight-register-form {
+    display: flex;
+    gap: 8px;
+}
+.freight-register-form input {
+    width: 100px;
+    padding: 0.5rem;
+    font-size: 0.9rem;
+}
+.freight-register-form button {
+    padding: 0.5rem 0.75rem;
+    font-size: 0.8rem;
+    white-space: nowrap;
+}
+
+td:last-child { /* Ações */
+    width: 100px;
+    text-align: center;
+}
+
+/* --- Botão e Container do Histórico --- */
+.history-toggle-btn {
+    background: none;
+    border: 1px solid var(--color-border);
+    color: var(--color-text-light);
+    padding: 0.3rem 0.6rem;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 0.8rem;
+    margin-top: 0.75rem;
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    transition: all 0.2s ease;
+}
+.history-toggle-btn:hover {
+    background-color: #333;
+    color: var(--color-text);
+}
+
+/* --- Estilos para Histórico de Fretes --- */
+.freight-history {
+    padding-top: 1rem;
+    border-top: 1px dashed var(--color-border);
+}
+
+.freight-history h4 {
+    font-size: 0.9rem;
+    font-weight: 500;
+    color: var(--color-text);
+    margin-bottom: 0.5rem;
+}
+
+.freight-history-list {
+    list-style: none;
+    max-height: 150px;
+    overflow-y: auto;
+    padding-right: 10px; /* Espaço para a barra de rolagem */
+}
+
+.freight-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 0.4rem 0.6rem;
+    border-radius: 4px;
+    margin-bottom: 5px;
+    background-color: #2c2c2c;
+    font-size: 0.9rem;
+}
+
+.freight-item:hover {
+    background-color: #3a3a3a;
+}
+
+.freight-item-details {
+    display: flex;
+    flex-direction: column;
+}
+
+.freight-item-date {
+    font-size: 0.8rem;
+    color: var(--color-text-light);
+    text-transform: capitalize;
+}
+
+.freight-item-value {
+    font-weight: 500;
+}
+
+.freight-item-actions button {
+    background: none;
+    border: none;
+    cursor: pointer;
+    color: var(--color-text-light);
+    padding: 2px;
+    font-size: 1.1rem;
+    line-height: 1;
+}
+.freight-item-actions button:hover {
+    color: var(--color-primary);
+}
+.freight-item-actions .delete-freight-btn:hover {
+    color: var(--color-danger);
+}
+
+/* --- Estilos para o Modal de Edição --- */
+.modal-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0,0,0,0.6);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 1000;
+}
+.modal-content {
+    background: var(--color-bg-panel);
+    padding: 2rem;
+    border-radius: var(--border-radius);
+    box-shadow: 0 5px 20px rgba(0,0,0,0.2);
+    width: 90%;
+    max-width: 400px;
+    position: relative;
+}
+.modal-close-btn {
+    position: absolute;
+    top: 10px;
+    right: 15px;
+    background: none;
+    border: none;
+    font-size: 1.8rem;
+    color: var(--color-text-light);
+    cursor: pointer;
+}
+.modal-content label {
+    display: block;
+    margin-bottom: 0.5rem;
+    font-weight: 500;
+}
+
+/* Estilos para o Modal de Compartilhamento */
+#share-modal textarea,
+#rules-modal textarea {
+    width: 100%;
+    height: 250px;
+    background-color: #2c2c2c;
+    color: var(--color-text);
+    border: 1px solid var(--color-border);
+    border-radius: var(--border-radius);
+    padding: 1rem;
+    margin-bottom: 1rem;
+    font-family: 'Courier New', Courier, monospace;
+    font-size: 0.9rem;
+    resize: none;
+}
+
+/* Responsividade */
+@media (max-width: 900px) {
+    main {
+        flex-direction: column;
+    }
+}
