@@ -67,25 +67,38 @@ document.addEventListener('DOMContentLoaded', () => {
         const driverToPenalize = drivers.find(d => d.id === driverId);
         if (!driverToPenalize) return;
 
-        if (confirm(`Tem certeza que deseja marcar que ${driverToPenalize.name} recusou a carga? O faturamento dele será ajustado para que ele vá para o final da fila.`)) {
-            // 1. Encontra o faturamento máximo atual na fila
-            let maxRevenue = 0;
-            drivers.forEach(driver => {
-                const revenue = driver.freights.reduce((sum, f) => sum + f.value, 0);
-                if (revenue > maxRevenue) {
-                    maxRevenue = revenue;
-                }
-            });
+        // 1. Encontra o faturamento máximo atual na fila, ignorando o motorista que será penalizado
+        let maxRevenue = 0;
+        drivers.forEach(driver => {
+            if (driver.id === driverId) return; 
+            const revenue = driver.freights.reduce((sum, f) => sum + f.value, 0);
+            if (revenue > maxRevenue) {
+                maxRevenue = revenue;
+            }
+        });
 
-            // 2. Calcula o faturamento atual do motorista a ser penalizado
-            const currentRevenue = driverToPenalize.freights.reduce((sum, f) => sum + f.value, 0);
+        // 2. Calcula o faturamento atual do motorista a ser penalizado
+        const currentRevenue = driverToPenalize.freights.reduce((sum, f) => sum + f.value, 0);
 
-            // 3. O "valor" da penalidade é a diferença necessária para ultrapassar o faturamento máximo, garantindo que o motorista vá para o final.
-            const penaltyValue = (maxRevenue - currentRevenue) + 1;
+        // 3. Calcula o novo faturamento para a penalidade (deve ser maior que o máximo)
+        const newSortingRevenue = maxRevenue + 1;
+
+        const confirmMessage = `
+Tem certeza que deseja marcar que ${driverToPenalize.name} recusou a carga?
+
+Faturamento atual (p/ rodízio): ${currentRevenue.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}
+Novo faturamento (p/ rodízio): ${newSortingRevenue.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}
+
+Isso o moverá para o final da fila.
+        `.trim().replace(/^ +/gm, '');
+
+        if (confirm(confirmMessage)) {
+            // O valor da "penalidade" é a diferença para atingir o novo faturamento
+            const penaltyValue = (newSortingRevenue - currentRevenue);
 
             const penaltyFreight = {
                 id: Date.now(),
-                value: penaltyValue > 0 ? penaltyValue : 1, // Adiciona no mínimo 1 para desempatar casos de faturamento igual
+                value: penaltyValue > 0 ? penaltyValue : 1, // Garante que a penalidade tenha um valor
                 date: new Date().toISOString(),
                 type: 'penalty',
                 description: 'Carga Recusada'
@@ -95,6 +108,40 @@ document.addEventListener('DOMContentLoaded', () => {
             saveDrivers();
             render();
         }
+    }
+
+    /**
+     * Calcula o faturamento total de um motorista para um dia específico da semana ATUAL.
+     * @param {object} driver - O objeto do motorista.
+     * @param {number} dayOfWeek - O dia da semana (0=Dom, 1=Seg, ..., 6=Sáb).
+     */
+    function getRevenueForDay(driver, dayOfWeek) {
+        const today = new Date();
+        // Clone to avoid modifying original date
+        const checkDate = new Date(today);
+        // Find the Monday of the current week
+        const currentDay = checkDate.getDay(); // 0=Sun, 1=Mon, ..., 6=Sat
+        const distance = (currentDay === 0) ? 6 : currentDay - 1; // Distance from Monday
+        checkDate.setDate(checkDate.getDate() - distance);
+        const startOfWeek = new Date(checkDate.setHours(0, 0, 0, 0));
+
+        const endOfWeek = new Date(startOfWeek);
+        endOfWeek.setDate(endOfWeek.getDate() + 6);
+        endOfWeek.setHours(23, 59, 59, 999);
+
+        const total = driver.freights
+            .filter(f => {
+                if (f.type === 'penalty') return false;
+                const freightDate = new Date(f.date);
+                
+                if (freightDate >= startOfWeek && freightDate <= endOfWeek) {
+                    return freightDate.getDay() === dayOfWeek;
+                }
+                return false;
+            })
+            .reduce((sum, f) => sum + f.value, 0);
+
+        return total;
     }
 
     /**
@@ -109,7 +156,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
         if (drivers.length === 0) {
             const tr = document.createElement('tr');
-            tr.innerHTML = `<td colspan="6" style="text-align:center; padding: 2rem;">Nenhum motorista cadastrado.</td>`;
+            tr.innerHTML = `<td colspan="12" style="text-align:center; padding: 2rem;">Nenhum motorista cadastrado.</td>`;
             driverListBody.appendChild(tr);
             return;
         }
@@ -123,8 +170,11 @@ document.addEventListener('DOMContentLoaded', () => {
 
             const sortingRevenue = driver.freights.reduce((sum, freight) => sum + freight.value, 0);
 
+            // Verifica se a última ação foi uma penalidade (recusa de carga)
             const lastFreight = driver.freights.length > 0 ? driver.freights[driver.freights.length - 1] : null;
-            const lastFreightDate = lastFreight ? new Date(lastFreight.date) : null;
+            const hasPenalty = lastFreight && lastFreight.type === 'penalty';
+            const penaltyBadge = hasPenalty ? `<span class="rejection-badge" title="Este motorista recusou a última carga e foi para o final da fila."><span class="material-symbols-outlined">gavel</span> Recusou</span>` : '';
+
 
             const tr = document.createElement('tr');
             
@@ -137,11 +187,21 @@ document.addEventListener('DOMContentLoaded', () => {
                 currency: 'BRL'
             });
 
-            const formattedDate = lastFreightDate
-                ? lastFreightDate.toLocaleString('pt-BR', {
-                    day: '2-digit', month: '2-digit', hour: '2-digit', minute: '2-digit'
-                  })
-                : '---';
+            // Calcula faturamento para cada dia da semana atual
+            const dailyRevenues = [
+                getRevenueForDay(driver, 1), // Seg
+                getRevenueForDay(driver, 2), // Ter
+                getRevenueForDay(driver, 3), // Qua
+                getRevenueForDay(driver, 4), // Qui
+                getRevenueForDay(driver, 5), // Sex
+                getRevenueForDay(driver, 6), // Sáb
+                getRevenueForDay(driver, 0)  // Dom
+            ];
+
+            const dailyCells = dailyRevenues.map(rev => {
+                const formattedRev = rev > 0 ? rev.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' }) : '---';
+                return `<td>${formattedRev}</td>`;
+            }).join('');
 
             // Cria o histórico de fretes (inicialmente oculto)
             const historyContent = driver.freights.length > 0 ? `
@@ -187,12 +247,12 @@ document.addEventListener('DOMContentLoaded', () => {
 
             tr.innerHTML = `
                 <td>${index + 1}º</td>
-                <td>${driver.name}</td>
+                <td>${driver.name} ${penaltyBadge}</td>
                 <td>
                     <span class="revenue-real">${formattedRealRevenue}</span>
-                    <span class="revenue-sorting">${formattedSortingRevenue}</span>
+                    <span class="revenue-sorting">P/ Rodízio: ${formattedSortingRevenue}</span>
                 </td>
-                <td>${formattedDate}</td>
+                ${dailyCells}
                 <td>
                     <form class="freight-register-form" data-id="${driver.id}">
                         <input type="number" class="freight-value-input" placeholder="R$" min="0.01" step="0.01" required>
@@ -267,7 +327,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
         rows.forEach(row => {
             // Ignora a linha de "nenhum motorista"
-            if (row.children.length === 1 && row.children[0].colSpan === 6) return;
+            if (row.children.length === 1 && row.children[0].colSpan === 12) return;
 
             const driverName = row.dataset.driverName;
             const isVisible = driverName.includes(searchTerm);
@@ -446,7 +506,8 @@ document.addEventListener('DOMContentLoaded', () => {
         const today = new Date().toLocaleDateString('pt-BR', { day: '2-digit', month: '2-digit', year: 'numeric' });
  
         let text = `*RODÍZIO DE FRETES FIORINOS* 🚛\n`;
-        text += `_Atualizado em: ${today}_\n`;
+        text += `_Atualizado em: ${today}_
+`;
         text += `-----------------------------------\n\n`;
  
         if (drivers.length === 0) {
@@ -494,11 +555,11 @@ document.addEventListener('DOMContentLoaded', () => {
      */
     function openRulesModal() {
         const rulesText = `
-*COMUNICADO IMPORTANTE: NOVO SISTEMA DE RODÍZIO DE FRETES* 🚛
+*COMUNICADO IMPORTANTE: NOVO SISTEMA DE RODÍZIO DE FRETES (EXCLUSIVO FIORINOS)* 🚛
 
 Atenção, motoristas!
 
-Para deixar a distribuição de fretes mais justa e equilibrada para todos, estamos modernizando nosso sistema.
+Para deixar a distribuição de fretes mais justa e equilibrada para todos os motoristas de *Fiorino*, estamos modernizando nosso sistema.
 
 *1. O FIM DO "QUADRO DA VEZ"*
 O antigo "Quadro da Vez" está sendo substituído por este novo sistema digital. A ordem de carregamento não será mais fixa.
