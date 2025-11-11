@@ -573,6 +573,7 @@ td:last-child { /* Ações */
     display: flex;
     gap: 8px;
     justify-content: center;
+    flex-wrap: wrap; /* Adicionado: Permite que os botões quebrem para a linha de baixo */
     align-items: center;
 }
 
