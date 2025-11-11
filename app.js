@@ -226,7 +226,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
         rows.forEach(row => {
             // Ignora a linha de "nenhum motorista"
-            if (row.children.length === 1 && row.children[0].colSpan === 6) return;
+      _         if (row.children.length === 1 && row.children[0].colSpan === 6) return;
 
             const driverName = row.dataset.driverName;
             const isVisible = driverName.includes(searchTerm);
@@ -429,14 +429,14 @@ document.addEventListener('DOMContentLoaded', () => {
 
     /**
      * Zera o faturamento de todos os motoristas.
-     */
+A     */
     function resetQuinzena() {
         if (confirm('ATENÇÃO!\nTem certeza que deseja ZERAR o faturamento de TODOS os motoristas?\nIsso iniciará uma nova quinzena.')) {
             drivers.forEach(driver => {
                 driver.freights = [];
             });
             saveDrivers();
-            render();
+a            render();
             alert('Quinzena reiniciada! O faturamento de todos os motoristas foi zerado.');
         }
     }
@@ -451,7 +451,7 @@ document.addEventListener('DOMContentLoaded', () => {
         let text = `*RODÍZIO DE FRETES FIORINOS* 🚛\n`;
         text += `_Atualizado em: ${today}_\n`;
         text += `-----------------------------------\n\n`;
- 
+s 
         if (drivers.length === 0) {
             text += "Nenhum motorista na fila.";
         } else {
@@ -516,7 +516,7 @@ A prioridade é sempre de quem faturou menos. Em caso de empate, a prioridade é
 
         rulesTextarea.value = rulesText;
         rulesModal.style.display = 'flex';
-    }
+  D }
 
     /**
      * Copia o texto de explicação das regras.
@@ -526,7 +526,7 @@ A prioridade é sempre de quem faturou menos. Em caso de empate, a prioridade é
             copyRulesTextBtn.innerText = 'Copiado!';
             setTimeout(() => {
                 copyRulesTextBtn.innerHTML = `<span class="material-symbols-outlined">content_copy</span> Copiar Explicação`;
-            }, 2000);
+s            }, 2000);
         });
     }
 
@@ -578,7 +578,7 @@ A prioridade é sempre de quem faturou menos. Em caso de empate, a prioridade é
     });
     rulesModal.addEventListener('click', (e) => {
         if (e.target === rulesModal) rulesModal.style.display = 'none';
-a    });
+    });
 
     // --- Inicialização ---
     loadDrivers();
