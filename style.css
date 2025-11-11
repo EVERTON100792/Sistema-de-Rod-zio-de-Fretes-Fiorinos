@@ -222,40 +222,76 @@ input:focus {
 }
 .btn-small-success:hover { background-color: var(--color-success-dark); }
 
-/* Tabela do Quadro */
+/* ============================================= */
+/* === NOVA ESTILIZAÇÃO DA TABELA PROFISSIONAL === */
+/* ============================================= */
+
 .table-container {
     width: 100%;
-    overflow-x: auto; /* Garante responsividade em telas menores */
+    background-color: var(--color-bg-panel);
+    border-radius: var(--border-radius);
+    padding: 0.5rem;
+    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.25);
+    border: 1px solid var(--color-border);
 }
 
 table {
     width: 100%;
-    border-collapse: collapse;
-    margin-top: 1rem;
+    border-collapse: separate; /* Separado para usar border-spacing */
+    border-spacing: 0;
+    margin-top: 0;
+    table-layout: fixed;
+    font-size: 0.9rem;
 }
 
 th, td {
-    padding: 0.75rem 1rem;
+    padding: 0.8rem 0.6rem; /* Mais padding vertical */
     text-align: left;
-    border-bottom: 1px solid var(--color-border);
     vertical-align: middle;
+    word-wrap: break-word;
+    transition: background-color 0.3s ease;
+}
+
+/* Cabeçalho da Tabela */
+thead {
+    background-color: #181818; /* Fundo mais escuro para o cabeçalho */
 }
 
 th {
-    background-color: #252525;
+    color: var(--color-primary);
     font-weight: 500;
-    color: var(--color-text-light);
-    white-space: nowrap;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    font-size: 0.75rem;
+    border-bottom: 2px solid var(--color-primary);
+}
+
+/* Corpo da Tabela */
+tbody tr {
+    border-bottom: 1px solid var(--color-border);
+}
+
+tbody tr:last-child {
+    border-bottom: none; /* Remove a borda da última linha */
+}
+
+/* Efeito Zebra (listras) */
+tbody tr:nth-child(odd) {
+    background-color: #242424;
 }
 
 tbody tr:hover {
-    background-color: #2a2a2a;
+    background-color: #357abd20; /* Azul primário com transparência */
 }
 
 /* Destaque para o primeiro da lista (PRÓXIMO DA VEZ) */
 tbody tr:first-child {
-    background-color: rgba(74, 144, 226, 0.15); /* Fundo azul translúcido */
+    background: linear-gradient(90deg, rgba(74, 144, 226, 0.15) 0%, rgba(74, 144, 226, 0.05) 100%);
     border-left: 4px solid var(--color-primary);
+}
+
+tbody tr:first-child td {
+    font-weight: 500;
 }
 
 tbody tr:first-child td:first-child {
@@ -264,64 +300,94 @@ tbody tr:first-child td:first-child {
     position: relative;
 }
 
-/* Selo "PRÓXIMO" */
+/* Selo "PRÓXIMO" redesenhado */
 tbody tr:first-child td:first-child::after {
     content: 'PRÓXIMO';
     position: absolute;
-    top: -10px;
+    top: 0px;
     left: 50%;
     transform: translateX(-50%);
-    background-color: var(--color-primary);
+    background: var(--color-primary);
     color: white;
-    padding: 2px 6px;
-    border-radius: 10px;
-    font-size: 0.65rem;
+    padding: 3px 8px;
+    border-radius: 0 0 6px 6px;
+    font-size: 0.7rem;
     font-weight: 700;
     letter-spacing: 0.5px;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.2);
 }
 
 tbody tr:first-child td:nth-child(2) { /* Nome do próximo */
     font-weight: 700;
-    color: var(--color-primary);
+    color: var(--color-text);
 }
 
 /* Destaque para a linha pesquisada */
 tr.highlighted {
-    background-color: #357abd20; /* Azul primário com transparência */
+    background-color: #ffc10730;
     border-left: 4px solid var(--color-warning);
     border-right: 4px solid var(--color-warning);
 }
 
-td:nth-child(1) { /* Posição */
-    font-weight: 700;
-    font-size: 1.1rem;
-    color: var(--color-primary);
-    width: 50px;
+/* --- LARGURA E ALINHAMENTO DAS COLUNAS --- */
+
+/* 1. Posição */
+th:nth-child(1), td:nth-child(1) {
+    width: 45px;
     text-align: center;
 }
 
-td:nth-child(3) { /* Faturamento */
-    font-weight: 500;
-    white-space: nowrap;
-    line-height: 1.2;
+/* 2. Motorista */
+th:nth-child(2), td:nth-child(2) {
+    width: 14%;
+    text-align: left;
 }
 
-td:nth-child(4) { /* Data */
-    font-size: 0.9rem;
+/* 3. Faturamento */
+th:nth-child(3) {
+    width: 12%;
+}
+td:nth-child(3) {
+    width: 12%;
+    text-align: center;
+}
+
+/* 4-10. Dias da Semana */
+th:nth-child(n+4):nth-child(-n+10) {
+    width: 7.5%;
+    text-align: center;
+}
+td:nth-child(n+4):nth-child(-n+10) {
+    width: 7.5%;
+    white-space: nowrap;
+    text-align: center;
+}
+
+/* 11. Registrar Frete */
+th:nth-child(11), td:nth-child(11) {
+    width: 190px;
+}
+
+/* 12. Ações */
+th:nth-child(12), td:nth-child(12) {
+    width: 90px;
+    text-align: center;
+}
+
+/* Estilos específicos que sobraram */
+td:nth-child(1) { /* Posição */
+    font-weight: 700;
+    font-size: 1.1rem;
     color: var(--color-text-light);
-    white-space: nowrap;
 }
 
-/* Coluna de Registro de Frete */
-td:nth-child(5) {
-    min-width: 250px;
-}
 .freight-register-form {
     display: flex;
-    gap: 8px;
+    gap: 5px;
+    align-items: center;
 }
 .freight-register-form input {
-    width: 100px;
+    width: 100%;
     padding: 0.5rem;
     font-size: 0.9rem;
 }
@@ -332,7 +398,6 @@ td:nth-child(5) {
 }
 
 td:last-child { /* Ações */
-    width: 100px;
     text-align: center;
 }
 
@@ -488,9 +553,7 @@ td:last-child { /* Ações */
 /* =================================== */
 
 /* Célula de ações na tabela */
-td.actions-cell {
-    width: 120px; /* Aumentar a largura para caber os botões */
-}
+
 
 .actions-cell {
     display: flex;
@@ -554,11 +617,59 @@ td.actions-cell {
     font-weight: 500;
     font-size: 1rem;
     color: var(--color-text);
+    line-height: 1.2; /* Espaçamento melhorado */
 }
 
 .revenue-sorting {
     display: block;
-    font-size: 0.85rem;
+    font-size: 0.8rem; /* Levemente reduzido */
     color: var(--color-text-light);
     font-style: italic;
+    line-height: 1.1; /* Espaçamento melhorado */
+}
+
+/* =================================== */
+/* --- Estilos para Selo de Recusa --- */
+/* =================================== */
+
+.rejection-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    background-color: var(--color-danger);
+    color: white;
+    padding: 2px 6px;
+    border-radius: 4px;
+    font-size: 0.7rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    margin-left: 8px;
+    vertical-align: middle;
+    cursor: help;
+}
+.rejection-badge .material-symbols-outlined {
+    font-size: 0.9rem;
+}
+
+/* =================================== */
+/* --- Estilos para Selo de Recusa --- */
+/* =================================== */
+
+.rejection-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    background-color: var(--color-danger);
+    color: white;
+    padding: 2px 6px;
+    border-radius: 4px;
+    font-size: 0.7rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    margin-left: 8px;
+    vertical-align: middle;
+    cursor: help;
+}
+.rejection-badge .material-symbols-outlined {
+    font-size: 0.9rem;
 }
