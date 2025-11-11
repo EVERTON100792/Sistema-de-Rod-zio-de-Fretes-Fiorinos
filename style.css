@@ -431,7 +431,7 @@ td:last-child { /* Ações */
     width: 100%;
     height: 100%;
     background-color: rgba(0,0,0,0.6);
-  _Display: flex;
+    display: flex; /* <-- CORRIGIDO */
     justify-content: center;
     align-items: center;
     z-index: 1000;
@@ -453,7 +453,7 @@ td:last-child { /* Ações */
     border: none;
     font-size: 1.8rem;
     color: var(--color-text-light);
-Geral cursor: pointer;
+    cursor: pointer; /* <-- CORRIGIDO */
 }
 .modal-content label {
     display: block;
