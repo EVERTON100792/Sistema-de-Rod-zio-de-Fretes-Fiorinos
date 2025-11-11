@@ -39,6 +39,9 @@ document.addEventListener('DOMContentLoaded', () => {
                     if (!driver.freights) {
                         driver.freights = driver.accumulatedRevenue > 0 ? [{ id: new Date(driver.lastFreightDate).getTime(), value: driver.accumulatedRevenue, date: driver.lastFreightDate }] : [];
                     }
+                    if (typeof driver.isPaused === 'undefined') {
+                        driver.isPaused = false; // Adiciona a nova propriedade se não existir
+                    }
                 });
             } else {
                 drivers = [];
@@ -175,6 +178,9 @@ Isso o moverá para o final da fila.
             const hasPenalty = lastFreight && lastFreight.type === 'penalty';
             const penaltyBadge = hasPenalty ? `<span class="rejection-badge" title="Este motorista recusou a última carga e foi para o final da fila."><span class="material-symbols-outlined">gavel</span> Recusou</span>` : '';
 
+            const isPaused = driver.isPaused;
+            const pausedBadge = isPaused ? `<span class="paused-badge" title="Este motorista está temporariamente indisponível."><span class="material-symbols-outlined">pause_circle</span> Pausado</span>` : '';
+
 
             const tr = document.createElement('tr');
             
@@ -246,15 +252,15 @@ Isso o moverá para o final da fila.
 
 
             tr.innerHTML = `
-                <td>${index + 1}º</td>
-                <td>${driver.name} ${penaltyBadge}</td>
+                <td>${isPaused ? '-' : `${index + 1}º`}</td>
+                <td>${driver.name} ${penaltyBadge} ${pausedBadge}</td>
                 <td>
                     <span class="revenue-real">${formattedRealRevenue}</span>
                     <span class="revenue-sorting">P/ Rodízio: ${formattedSortingRevenue}</span>
                 </td>
                 ${dailyCells}
                 <td>
-                    <form class="freight-register-form" data-id="${driver.id}">
+                    <form class="freight-register-form" data-id="${driver.id}" ${isPaused ? 'style="display:none;"' : ''}>
                         <input type="number" class="freight-value-input" placeholder="R$" min="0.01" step="0.01" required>
                         <button type="submit" class="btn btn-small-success">Lançar</button>
                     </form>
@@ -262,7 +268,13 @@ Isso o moverá para o final da fila.
                     <div class="history-container" style="display: none;">${historyContent}</div>
                 </td>
                 <td class="actions-cell">
-                    <button class="btn btn-small-warning refuse-btn" title="Recusar Carga (Aplica Penalidade)"><span class="material-symbols-outlined">thumb_down</span></button>
+                    ${isPaused 
+                        ? `<button class="btn btn-small-success pause-toggle-btn" title="Reativar Motorista"><span class="material-symbols-outlined">play_arrow</span></button>`
+                        : `<button class="btn btn-small-secondary pause-toggle-btn" title="Marcar como Indisponível (Pausar)"><span class="material-symbols-outlined">pause</span></button>`
+                    }
+                    <button class="btn btn-small-warning refuse-btn" title="Recusar Carga (Aplica Penalidade)" ${isPaused ? 'disabled' : ''}>
+                        <span class="material-symbols-outlined">thumb_down</span>
+                    </button>
                     <button class="btn btn-small-danger remove-btn" title="Remover Motorista"><span class="material-symbols-outlined">delete</span></button>
                 </td>
             `;
@@ -276,6 +288,11 @@ Isso o moverá para o final da fila.
             tr.querySelector('.refuse-btn').addEventListener('click', () => {
                 penalizeDriver(driver.id);
             });
+            tr.querySelector('.pause-toggle-btn').addEventListener('click', () => {
+                togglePauseDriver(driver.id);
+            });
+
+            if (isPaused) tr.classList.add('paused-driver');
 
             // Adiciona listener para o formulário de LANÇAR FRETE
             tr.querySelector('.freight-register-form').addEventListener('submit', (e) => {
@@ -345,12 +362,18 @@ Isso o moverá para o final da fila.
      */
     function sortDrivers() {
         drivers.sort((a, b) => {
+            // Critério 0: Motoristas pausados vão para o final
+            if (a.isPaused && !b.isPaused) return 1;
+            if (!a.isPaused && b.isPaused) return -1;
+
+            // Critério 1: Faturamento
             const revenueA = a.freights.reduce((sum, f) => sum + f.value, 0);
             const revenueB = b.freights.reduce((sum, f) => sum + f.value, 0);
 
             if (revenueA < revenueB) return -1;
             if (revenueA > revenueB) return 1;
 
+            // Critério 2: Data do último frete (desempate)
             const lastFreightA = a.freights.length > 0 ? a.freights[a.freights.length - 1] : null;
             const lastFreightB = b.freights.length > 0 ? b.freights[b.freights.length - 1] : null;
             const dateA = lastFreightA ? new Date(lastFreightA.date).getTime() : 0;
@@ -378,7 +401,8 @@ Isso o moverá para o final da fila.
         const newDriver = {
             id: Date.now(),
             name: name.trim(),
-            freights: [] // Novo: histórico de fretes
+            freights: [], // Novo: histórico de fretes
+            isPaused: false // Novo: status de pausa
         };
 
         drivers.push(newDriver);
@@ -397,6 +421,22 @@ Isso o moverá para o final da fila.
         if (confirm(`Tem certeza que deseja remover ${driver.name}? Esta ação não pode ser desfeita.`)) {
             drivers = drivers.filter(d => d.id !== id);
             saveDrivers();
+            render();
+        }
+    }
+
+    /**
+     * Alterna o estado de pausa de um motorista.
+     * @param {number} driverId 
+     */
+    function togglePauseDriver(driverId) {
+        const driver = drivers.find(d => d.id === driverId);
+        if (driver) {
+            driver.isPaused = !driver.isPaused;
+            const action = driver.isPaused ? 'pausado' : 'reativado';
+            console.log(`Motorista ${driver.name} foi ${action}.`);
+            saveDrivers();
+            // Re-renderizar irá re-ordenar e atualizar a UI
             render();
         }
     }
@@ -520,8 +560,11 @@ Isso o moverá para o final da fila.
                 const position = index + 1;
                 // Alinha o número da posição à direita para um visual limpo
                 const positionStr = String(position).padStart(maxPositionLength, ' ');
+                
+                // Não mostra motoristas pausados na lista de compartilhamento
+                if (driver.isPaused) return;
 
-                text += `${positionStr}º - ${driver.name}\n`;
+                text += `${positionStr}º - ${driver.name}\n`; // Apenas motoristas ativos
             });
         }
  
@@ -569,10 +612,14 @@ A fila agora é 100% baseada no faturamento. O sistema organiza a lista do motor
 *OBJETIVO:* Dar a chance de carregar para quem está com o faturamento mais baixo, buscando um equilíbrio financeiro para todo o grupo.
 
 *3. E SE ALGUÉM RECUSAR UMA CARGA?*
-Entendemos que imprevistos acontecem. No entanto, para manter a fila justa, o motorista que recusar uma carga receberá uma *penalidade*.
+Entendemos que imprevistos acontecem. No entanto, para manter a fila justa, o motorista que *recusar uma carga na hora* receberá uma *penalidade*.
 *A PENALIDADE:* O sistema irá ajustar o faturamento desse motorista para que ele se torne o mais alto da lista, movendo-o automaticamente para o *último lugar da fila*. Ele só voltará a subir na lista conforme os outros motoristas forem carregando e aumentando seus faturamentos.
 
-*4. COMO SABER MINHA POSIÇÃO?*
+*4. E SE EU PRECISAR FICAR INDISPONÍVEL? (NOVO)*
+Se você tiver um compromisso pessoal ou souber com antecedência que não poderá carregar, *avise ao responsável*.
+*COMO FUNCIONA:* Seu nome será "pausado" no sistema. Você sairá temporariamente da fila de carregamento, sem receber nenhuma penalidade no faturamento. Quando você estiver disponível novamente, é só avisar para ser reativado e você voltará para a fila na posição correspondente ao seu faturamento atual.
+
+*5. COMO SABER MINHA POSIÇÃO?*
 Todos os dias, a lista com a ordem atualizada será compartilhada no grupo do WhatsApp para que todos possam acompanhar sua posição na fila.
 
 Este sistema foi criado para beneficiar a todos, trazendo mais transparência e equilíbrio. Contamos com a colaboração de vocês!

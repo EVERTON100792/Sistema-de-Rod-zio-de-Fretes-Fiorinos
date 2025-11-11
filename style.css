@@ -203,7 +203,7 @@ input:focus {
 .btn-danger:hover { background-color: var(--color-danger-dark); }
 
 /* Botões pequenos da tabela */
-.btn-small-danger, .btn-small-success, .btn-small-warning {
+.btn-small-danger, .btn-small-success, .btn-small-warning, .btn-small-secondary {
     padding: 0.35rem 0.6rem;
     font-size: 0.85rem;
     border-radius: 4px;
@@ -221,6 +221,12 @@ input:focus {
     color: white;
 }
 .btn-small-success:hover { background-color: var(--color-success-dark); }
+
+.btn-small-secondary {
+    background-color: #6c757d; /* Cinza neutro */
+    color: white;
+}
+.btn-small-secondary:hover { background-color: #5a6268; }
 
 /* ============================================= */
 /* === NOVA ESTILIZAÇÃO DA TABELA PROFISSIONAL === */
@@ -328,6 +334,14 @@ tr.highlighted {
     border-left: 4px solid var(--color-warning);
     border-right: 4px solid var(--color-warning);
 }
+
+/* Estilo para motorista pausado */
+tbody tr.paused-driver {
+    background-color: #333 !important; /* Sobrescreve outros backgrounds */
+    color: var(--color-text-light);
+    opacity: 0.6;
+}
+tbody tr.paused-driver:hover { opacity: 0.8; }
 
 /* --- LARGURA E ALINHAMENTO DAS COLUNAS --- */
 
@@ -651,6 +665,24 @@ td:last-child { /* Ações */
     font-size: 0.9rem;
 }
 
+/* =================================== */
+/* --- Estilos para Selo de Pausa --- */
+/* =================================== */
+
+.paused-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    background-color: #6c757d;
+    color: white;
+    padding: 2px 6px;
+    border-radius: 4px;
+    font-size: 0.7rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    margin-left: 8px;
+    vertical-align: middle;
+}
 /* =================================== */
 /* --- Estilos para Selo de Recusa --- */
 /* =================================== */
